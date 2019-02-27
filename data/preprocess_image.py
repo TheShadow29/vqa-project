@@ -59,7 +59,7 @@ def features_to_zarr(phase):
                 item['image_w'] = int(item['image_w'])
                 item['num_boxes'] = int(item['num_boxes'])
                 for field in ['boxes', 'features']:
-                    encoded_str = base64.decodestring(
+                    encoded_str = base64.decodebytes(
                         item[field].encode('utf-8'))
                     item[field] = np.frombuffer(encoded_str,
                                                 dtype=np.float32).reshape((item['num_boxes'], -1))
@@ -97,7 +97,7 @@ def features_to_zarr(phase):
     dest = zarr.open_group(phase + '_boxes.zarr', mode='w')
     zarr.copy_all(i_feat, dest)
     i_feat.close()
-    dest.close()
+    # dest.close()
     os.remove(phase + 'box.hdf5')
 
     # select features and fill hdf5
@@ -116,14 +116,15 @@ def features_to_zarr(phase):
     dest = zarr.open_group(phase + '.zarr', mode='w')
     zarr.copy_all(i_feat, dest)
     i_feat.close()
-    dest.close()
+    # dest.close()
     os.remove(phase + '.hdf5')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-                        description='Preprocessing for VQA v2 image data')
-    parser.add_argument('-d', '--data', nargs='+', help='trainval, and/or test, list of data phases to be processed', required=True)
+        description='Preprocessing for VQA v2 image data')
+    parser.add_argument('-d', '--data', nargs='+',
+                        help='trainval, and/or test, list of data phases to be processed', required=True)
     args, unparsed = parser.parse_known_args()
     if len(unparsed) != 0:
         raise SystemExit('Unknown argument: {}'.format(unparsed))

@@ -138,8 +138,10 @@ def combine_qa(questions, annotations, phase):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                         description='Preprocessing for VQA v2 text data')
-    parser.add_argument('-d', '--data', nargs='+', help='train, val and/or test, list of data phases to be processed', required=True)
-    parser.add_argument('--n', '--nanswers', default=3000, help='number of top answers to consider for classification.')
+    parser.add_argument('-d', '--data', nargs='+',
+                        help='train, val and/or test, list of data phases to be processed', required=True)
+    parser.add_argument('--n', '--nanswers', default=3000,
+                        help='number of top answers to consider for classification.')
     args, unparsed = parser.parse_known_args()
     if len(unparsed) != 0:
         raise SystemExit('Unknown argument: {}'.format(unparsed))
@@ -148,7 +150,7 @@ if __name__ == '__main__':
 
     for phase in phase_list:
 
-        if not os.path.exists('raw/v2_OpenEnded_mscoco_' + phase + '2014_questions.json'):
+    if not os.path.exists('raw/v2_OpenEnded_mscoco_' + phase + '2014_questions.json'):
             raise SystemExit('Must download data first')
 
         print('processing ' + phase + ' data')
