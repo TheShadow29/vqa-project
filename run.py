@@ -30,8 +30,8 @@ from sparse_graph_model import Model
 from torch_dataset import *
 from utils import *
 
-def eval_model(args):
 
+def eval_model(args):
     """
         Computes the VQA accuracy over the validation set
         using a pre-trained model
@@ -54,12 +54,12 @@ def eval_model(args):
     print('Loading data')
     dataset = VQA_Dataset(args.data_dir, args.emb, train=False)
     loader = DataLoader(dataset, batch_size=args.bsize,
-                        shuffle=False, num_workers=5, 
+                        shuffle=False, num_workers=5,
                         collate_fn=collate_fn)
 
     # Print data and model parameters
     print('Parameters:\n\t'
-          'vocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d' 
+          'vocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d'
           '\n\thidden dim: %d\n\toutput dim: %d' % (dataset.q_words, args.emb,
                                                     dataset.feat_dim,
                                                     args.hid,
@@ -111,8 +111,8 @@ def eval_model(args):
     json.dump(result, open('result.json', 'w'))
     print('Validation done')
 
-def train(args):
 
+def train(args):
     """
         Train a VQA model using the training set
     """
@@ -213,10 +213,10 @@ def train(args):
             # Compute batch accuracy based on vqa evaluation
             correct = total_vqa_score(output, vote_batch)
             ep_correct += correct
-            ep_loss += loss.data[0]
+            ep_loss += loss.item()
             ave_correct += correct
-            ave_loss += loss.data[0]
-            losses.append(loss.cpu().data[0])
+            ave_loss += loss.item()
+            losses.append(loss.item())
 
             # This is a 40 step average
             if step % 40 == 0 and step != 0:
@@ -265,8 +265,8 @@ def train(args):
         print('Epoch %02d done, average loss: %.3f, average accuracy: %.2f%%' % (
               ep+1, epoch_loss, epoch_acc))
 
-def test(args):
 
+def test(args):
     """
         Creates a result.json for predictions on
         the test set
@@ -282,16 +282,16 @@ def test(args):
         torch.cuda.manual_seed(1000)
     else:
         raise SystemExit('No CUDA available, script requires CUDA')
- 
+
     print('Loading data')
     dataset = VQA_Dataset_Test(args.data_dir, args.emb, train=False)
-    loader = DataLoader(dataset, batch_size=args.bsize, 
-                        shuffle=False, num_workers=5, 
+    loader = DataLoader(dataset, batch_size=args.bsize,
+                        shuffle=False, num_workers=5,
                         collate_fn=collate_fn)
 
     # Print data and model parameters
     print('Parameters:\n\t'
-          'vocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d' 
+          'vocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d'
           '\n\thidden dim: %d\n\toutput dim: %d' % (dataset.q_words, args.emb,
                                                     dataset.feat_dim,
                                                     args.hid,
@@ -306,10 +306,10 @@ def test(args):
                   dropout=args.dropout,
                   pretrained_wemb=dataset.pretrained_wemb,
                   neighbourhood_size=args.neighbourhood_size)
- 
+
     # move to CUDA
     model = model.cuda()
- 
+
     # Restore pre-trained model
     ckpt = torch.load(args.model_path)
     model.load_state_dict(ckpt['state_dict'])
@@ -320,7 +320,7 @@ def test(args):
         # Batch preparation
         q_batch, _, _, i_batch, k_batch, qlen_batch = \
             batch_to_cuda(next_batch, volatile=True)
- 
+
         # get predictions
         output, _ = model(q_batch, i_batch, k_batch, qlen_batch)
         qid_batch = next_batch[3]
@@ -331,37 +331,37 @@ def test(args):
                 'question_id': int(qid.numpy()),
                 'answer': dataset.a_itow[oix[i]]
             })
- 
+
     json.dump(result, open('result.json', 'w'))
     print('Testing done')
 
-def trainval(args):
 
+def trainval(args):
     """
         Train a VQA model using the training + validation set
     """
- 
+
     # set random seed
     torch.manual_seed(1000)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1000)
     else:
         raise SystemExit('No CUDA available, script requires CUDA.')
-    
+
     # load train+val sets for training
-    print ('Loading data')
+    print('Loading data')
     dataset = VQA_Dataset_Test(args.data_dir, args.emb)
-    loader = DataLoader(dataset, batch_size=args.bsize, 
-                        shuffle=True, num_workers=5, 
+    loader = DataLoader(dataset, batch_size=args.bsize,
+                        shuffle=True, num_workers=5,
                         collate_fn=collate_fn)
     n_batches = len(dataset)//args.bsize
 
     # Print data and model parameters
-    print ('Parameters:\n\tvocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d\
+    print('Parameters:\n\tvocab size: %d\n\tembedding dim: %d\n\tfeature dim: %d\
             \n\thidden dim: %d\n\toutput dim: %d' % (dataset.q_words, args.emb, dataset.feat_dim,
-                args.hid, dataset.n_answers))
-    print ('Initializing model')
- 
+                                                     args.hid, dataset.n_answers))
+    print('Initializing model')
+
     model = Model(vocab_size=dataset.q_words,
                   emb_dim=args.emb,
                   feat_dim=dataset.feat_dim,
@@ -370,7 +370,7 @@ def trainval(args):
                   dropout=args.dropout,
                   neighbourhood_size=args.neighbourhood_size,
                   pretrained_wemb=dataset.pretrained_wemb)
- 
+
     criterion = nn.MultiLabelSoftMarginLoss()
 
     # Move it to GPU
@@ -379,26 +379,26 @@ def trainval(args):
 
     # Define the optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
- 
+
     # Continue training from saved model
     start_ep = 0
     if args.model_path and os.path.isfile(args.model_path):
-        print ('Resuming from checkpoint %s' % (args.model_path))
+        print('Resuming from checkpoint %s' % (args.model_path))
         ckpt = torch.load(args.model_path)
         start_ep = ckpt['epoch']
         model.load_state_dict(ckpt['state_dict'])
         optimizer.load_state_dict(ckpt['optimizer'])
- 
+
     # ensure you can load with new lr
     for param_group in optimizer.param_groups:
         param_group['lr'] = args.lr
- 
+
     # learner rate scheduler
     scheduler = MultiStepLR(optimizer, milestones=[30], gamma=0.5)
     scheduler.last_epoch = start_ep - 1
- 
+
     # Training script
-    print ('Start training.')
+    print('Start training.')
     for ep in range(start_ep, start_ep+args.ep):
         scheduler.step()
         ep_loss = 0.0
@@ -406,25 +406,26 @@ def trainval(args):
         ave_loss = 0.0
         ave_correct = 0.0
         losses = []
+        model.train()
         for step, next_batch in tqdm(enumerate(loader)):
-            model.train()
             # batch to gpu
+            optimizer.zero_grad()
             q_batch, a_batch, vote_batch, i_batch, k_batch, qlen_batch = \
                 batch_to_cuda(next_batch)
 
-             # Do model forward
+            # Do model forward
             output, adjacency_matrix = model(
                 q_batch, i_batch, k_batch, qlen_batch)
-            
+
             loss = criterion(output, a_batch)
- 
+
             # compute accuracy based on vqa evaluation
             correct = total_vqa_score(output, vote_batch)
             ep_correct += correct
-            ep_loss += loss.data[0]
+            ep_loss += loss.item()
             ave_correct += correct
-            ave_loss += loss.data[0]
-            losses.append(loss.cpu().data[0])
+            ave_loss += loss.item()
+            losses.append(loss.item())
             # This is a 40 step average
             if step % 40 == 0 and step != 0:
                 print('  Epoch %02d(%03d/%03d), ave loss: %.7f, ave accuracy: %.2f%%' %
@@ -434,16 +435,13 @@ def trainval(args):
                 ave_correct = 0
                 ave_loss = 0
                 ave_correct = ave_loss = ave_sparsity = 0
- 
+
             # compute gradient and do optim step
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
         # save model and compute accuracy for epoch
         epoch_loss = ep_loss / n_batches
         epoch_acc = ep_correct * 100 / (n_batches * args.bsize)
-
 
         save(model, optimizer, ep, epoch_loss, epoch_acc,
              dir=args.save_dir, name=args.name+'_'+str(ep+1))
@@ -454,7 +452,7 @@ def trainval(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-                        description='Conditional Graph Convolutions for VQA')
+        description='Conditional Graph Convolutions for VQA')
     parser.add_argument('--train', action='store_true',
                         help='set this to training mode.')
     parser.add_argument('--trainval', action='store_true',

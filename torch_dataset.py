@@ -245,10 +245,16 @@ class VQA_Dataset_Test(Dataset):
         q = [0] * self.seqlen
         qlen = len(self.vqa[idx]['question_toked'])
         for i, w in enumerate(self.vqa[idx]['question_toked'][:-1]):
-            try:
+            if i >= self.seqlen:
+                break
+            if w in self.q_wtoi:
                 q[i] = self.q_wtoi[w]
-            except:
-                q[i] = 0    # validation questions may contain unseen word
+            else:
+                q[i] = 0
+            # try:
+            #     q[i] = self.q_wtoi[w]
+            # except:
+            #     q[i] = 0    # validation questions may contain unseen word
 
         # soft label answers
         if self.train:

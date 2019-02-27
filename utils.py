@@ -38,7 +38,7 @@ def save(model, optimizer, ep, epoch_loss, epoch_acc, dir, name):
         'accuracy': epoch_acc,
         'state_dict': model.state_dict(),
         'optimizer': optimizer.state_dict()
-        }
+    }
     torch.save(tbs, os.path.join(dir, name + '.pth.tar'))
 
 
@@ -48,6 +48,6 @@ def total_vqa_score(output_batch, n_votes_batch):
     vqa_score = 0
     _, oix = output_batch.data.max(1)
     for i, pred in enumerate(oix):
-        count = n_votes_batch[i,pred]
-        vqa_score += min(count.data.cpu().numpy()[0]/3, 1)
+        count = n_votes_batch[i, pred]
+        vqa_score += min(count.item()/3, 1)
     return vqa_score

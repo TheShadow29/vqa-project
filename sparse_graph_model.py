@@ -37,7 +37,6 @@ class Model(nn.Module):
                  dropout,
                  n_kernels=8,
                  neighbourhood_size=16):
-
         '''
         ## Variables:
         - vocab_size: dimensionality of input vocabulary
@@ -112,7 +111,8 @@ class Model(nn.Module):
 
         # Compute question encoding
         emb = self.wembed(question)
-        packed = pack_padded_sequence(emb, qlen, batch_first=True)  # questions have variable lengths
+        # questions have variable lengths
+        packed = pack_padded_sequence(emb, qlen, batch_first=True)
         _, hid = self.q_lstm(packed)
         qenc = hid[0].unsqueeze(1)
         qenc_repeat = qenc.repeat(1, K, 1)
@@ -193,7 +193,6 @@ class Model(nn.Module):
                               adjacency_matrix,
                               neighbourhood_size,
                               weight=True):
-
         '''
 
         Creates a neighbourhood system for each graph node/image object
@@ -216,7 +215,9 @@ class Model(nn.Module):
         # extract top k neighbours for each node and normalise
         top_k, top_ind = torch.topk(
             adjacency_matrix, k=neighbourhood_size, dim=-1, sorted=False)
-        top_k = torch.stack([F.softmax(top_k[:, k]) for k in range(K)]).transpose(0, 1)  # (batch_size, K, neighbourhood_size)
+
+        top_k = torch.stack([F.softmax(top_k[:, k].contiguous(), dim=1) for k in range(K)]).transpose(
+            0, 1).contiguous()  # (batch_size, K, neighbourhood_size)
 
         # extract top k features and pseudo coordinates
         neighbourhood_image = \
