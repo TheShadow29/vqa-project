@@ -51,7 +51,7 @@ def eval_model(args):
         raise SystemExit('No CUDA available, script requires cuda')
 
     # Load the validation set
-    print('Loading data')
+    print('Loading data: eval')
     dataset = VQA_Dataset(args.data_dir, args.emb, train=False)
     loader = DataLoader(dataset, batch_size=args.bsize,
                         shuffle=False, num_workers=5,
@@ -125,7 +125,7 @@ def train(args):
         raise SystemExit('No CUDA available, script requires cuda')
 
     # Load the VQA training set
-    print('Loading data')
+    print('Loading data: train')
     dataset = VQA_Dataset(args.data_dir, args.emb)
     loader = DataLoader(dataset, batch_size=args.bsize,
                         shuffle=True, num_workers=5, collate_fn=collate_fn)
@@ -159,11 +159,11 @@ def train(args):
                   dropout=args.dropout,
                   neighbourhood_size=args.neighbourhood_size,
                   pretrained_wemb=dataset.pretrained_wemb)
-
     criterion = nn.MultiLabelSoftMarginLoss()
 
     # Move it to GPU
     model = model.cuda()
+    print('Model Initialized')
     criterion = criterion.cuda()
 
     # Define the optimiser
@@ -228,6 +228,7 @@ def train(args):
                 ave_loss = 0
 
             # Compute gradient and do optimisation step
+            # print(loss.size())
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -283,7 +284,7 @@ def test(args):
     else:
         raise SystemExit('No CUDA available, script requires CUDA')
 
-    print('Loading data')
+    print('Loading data: test')
     dataset = VQA_Dataset_Test(args.data_dir, args.emb, train=False)
     loader = DataLoader(dataset, batch_size=args.bsize,
                         shuffle=False, num_workers=5,
@@ -349,7 +350,7 @@ def trainval(args):
         raise SystemExit('No CUDA available, script requires CUDA.')
 
     # load train+val sets for training
-    print('Loading data')
+    print('Loading data: trainval')
     dataset = VQA_Dataset_Test(args.data_dir, args.emb)
     loader = DataLoader(dataset, batch_size=args.bsize,
                         shuffle=True, num_workers=5,
@@ -409,7 +410,7 @@ def trainval(args):
         model.train()
         for step, next_batch in tqdm(enumerate(loader)):
             # batch to gpu
-            optimizer.zero_grad()
+
             q_batch, a_batch, vote_batch, i_batch, k_batch, qlen_batch = \
                 batch_to_cuda(next_batch)
 
@@ -437,6 +438,7 @@ def trainval(args):
                 ave_correct = ave_loss = ave_sparsity = 0
 
             # compute gradient and do optim step
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
         # save model and compute accuracy for epoch

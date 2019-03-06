@@ -216,8 +216,8 @@ class Model(nn.Module):
         top_k, top_ind = torch.topk(
             adjacency_matrix, k=neighbourhood_size, dim=-1, sorted=False)
 
-        top_k = torch.stack([F.softmax(top_k[:, k].contiguous(), dim=1) for k in range(K)]).transpose(
-            0, 1).contiguous()  # (batch_size, K, neighbourhood_size)
+        top_k = torch.stack([F.softmax(top_k[:, k].contiguous(), dim=1) for k in range(
+            K)]).contiguous().permute(1, 0, 2).contiguous()  # (batch_size, K, neighbourhood_size)
 
         # extract top k features and pseudo coordinates
         neighbourhood_image = \

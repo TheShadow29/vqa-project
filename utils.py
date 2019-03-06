@@ -20,11 +20,11 @@ from torch.autograd import Variable
 def batch_to_cuda(batch, volatile=False):
     # moves dataset batch on GPU
 
-    q = Variable(batch[0], volatile=volatile, requires_grad=False).cuda()
-    a = Variable(batch[1], volatile=volatile, requires_grad=False).cuda()
-    n_votes = Variable(batch[2], volatile=volatile, requires_grad=False).cuda()
-    i = Variable(batch[4], volatile=volatile, requires_grad=False).cuda()
-    k = Variable(batch[5], volatile=volatile, requires_grad=False).cuda()
+    q = Variable(batch[0], requires_grad=False).cuda()
+    a = Variable(batch[1], requires_grad=False).cuda()
+    n_votes = Variable(batch[2], requires_grad=False).cuda()
+    i = Variable(batch[4], requires_grad=False).cuda()
+    k = Variable(batch[5], requires_grad=False).cuda()
     qlen = list(batch[6])
     return q, a, n_votes, i, k, qlen
 
