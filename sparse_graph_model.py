@@ -95,8 +95,8 @@ class Model(nn.Module):
         ## Returns:
         - logits (batch_size, out_dim)
         '''
-
-        K = int(K[0].cpu().data.numpy())
+        #print(K.cpu().numpy())
+        K = int(K.cpu().numpy()[0][0])
 
         # extract bounding boxes and compute centres
         bb = image[:, :, -4:].contiguous()
@@ -112,6 +112,8 @@ class Model(nn.Module):
         # Compute question encoding
         emb = self.wembed(question)
         # questions have variable lengths
+        # q len include invalid value
+        qlen = torch.min(qlen, torch.LongTensor([14]).expand_as(qlen))
         packed = pack_padded_sequence(emb, qlen, batch_first=True)
         _, hid = self.q_lstm(packed)
         qenc = hid[0].unsqueeze(1)

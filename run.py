@@ -128,7 +128,7 @@ def train(args):
     print('Loading data: train')
     dataset = VQA_Dataset(args.data_dir, args.emb)
     loader = DataLoader(dataset, batch_size=args.bsize,
-                        shuffle=True, num_workers=5, collate_fn=collate_fn)
+                        shuffle=True, num_workers=0, collate_fn=collate_fn)
 
     # Load the VQA validation set
     dataset_test = VQA_Dataset(args.data_dir, args.emb, train=False)
