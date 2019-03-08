@@ -64,6 +64,8 @@ def eval_model(args):
                                                     dataset.feat_dim,
                                                     args.hid,
                                                     dataset.n_answers))
+    import pdb
+    pdb.set_trace()
     # Define the model
     model = Model(vocab_size=dataset.q_words,
                   emb_dim=args.emb,
@@ -317,6 +319,7 @@ def test(args):
     model.train(False)
 
     result = []
+
     for step, next_batch in tqdm(enumerate(loader)):
         # Batch preparation
         q_batch, _, _, i_batch, k_batch, qlen_batch = \

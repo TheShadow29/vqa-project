@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
@@ -98,7 +99,6 @@ def process_questions(q):
     # a 1-indexed vocab translation table
     itow = {i+1: w for i, w in enumerate(vocab)}
     wtoi = {w: i+1 for i, w in enumerate(vocab)}  # inverse table
-
     pickle.dump({'itow': itow, 'wtoi': wtoi}, open('./train_q_dict.p', 'wb'))
 
 
@@ -148,6 +148,7 @@ if __name__ == '__main__':
         raise SystemExit('Unknown argument: {}'.format(unparsed))
 
     phase_list = args.data
+
     for phase in phase_list:
 
         if not os.path.exists('raw/v2_OpenEnded_mscoco_' + phase + '2014_questions.json'):

@@ -113,10 +113,10 @@ class Model(nn.Module):
         emb = self.wembed(question)
         # questions have variable lengths
         # q len include invalid value
-        max_length = torch.LongTensor([14]).cuda()
-        qlen = torch.min(qlen, max_length.expand_as(qlen))
-        packed = pack_padded_sequence(emb, qlen, batch_first=True)
-        _, hid = self.q_lstm(packed)
+        #max_length = torch.LongTensor([14]).cuda()
+        #qlen = torch.min(qlen, max_length.expand_as(qlen))
+        #packed = pack_padded_sequence(emb, qlen, batch_first=True)
+        _, hid = self.q_lstm(emb.transpose(0,1))
         qenc = hid[0].unsqueeze(1)
         qenc_repeat = qenc.repeat(1, K, 1)
 
